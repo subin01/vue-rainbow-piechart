@@ -1,6 +1,6 @@
 {
   "name": "vue-rainbow-piechart",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A Vue.js component that displays a Piechart",
   "main": "dist/vue-rainbow-piechart.js",
   "scripts": {
@@ -25,6 +25,7 @@
     "vue-html-loader": "^1.2.3",
     "vue-loader": "^11.1.4",
     "vue-style-loader": "^2.0.3",
+    "css-loader": "^0.28.7",
     "vue-template-compiler": "^2.2.1",
     "webpack": "1.13.1",
     "webpack-merge": "^4.1.0"

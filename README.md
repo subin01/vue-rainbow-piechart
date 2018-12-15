@@ -22,7 +22,7 @@ Include the script file, then install the component with `Vue.use(VueRainbowPiec
   src="node_modules/vue-rainbow-piechart-simple/dist/vue-rainbow-piechart.min.js"
 ></script>
 <script type="text/javascript">
-  Vue.use(VueClock);
+  Vue.use(VueRainbowPiechart);
 </script>
 ```
 

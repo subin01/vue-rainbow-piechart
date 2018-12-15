@@ -49,7 +49,7 @@ module.exports = [
     }
   }),
   merge(config, {
-    entry: path.resolve(__dirname + '/src/Clock.vue'),
+    entry: path.resolve(__dirname + '/src/VueRainbowPiechart.vue'),
     output: {
       filename: 'vue-rainbow-piechart.js',
       libraryTarget: 'umd',
