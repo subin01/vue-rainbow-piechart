@@ -1,6 +1,8 @@
-# vue-rainbow-piechart-simple
+# vue-rainbow-piechart
 
 A Vue component that shows Piechart
+
+![Screenshot](/Rainbow-Piechart-Example.png?raw=true 'Example usage')
 
 ## Installation
 
@@ -19,7 +21,7 @@ Include the script file, then install the component with `Vue.use(VueRainbowPiec
 ></script>
 <script
   type="text/javascript"
-  src="node_modules/vue-rainbow-piechart-simple/dist/vue-rainbow-piechart.min.js"
+  src="node_modules/vue-rainbow-piechart/dist/vue-rainbow-piechart.min.js"
 ></script>
 <script type="text/javascript">
   Vue.use(VueRainbowPiechart);
