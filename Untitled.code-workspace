@@ -1,0 +1,13 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "eslint.autoFixOnSave": true,
+    "prettier.singleQuote": true,
+    "vetur.format.defaultFormatter.html": "js-beautify-html",
+    "editor.formatOnSave": true
+  }
+}
