@@ -1,75 +1,90 @@
 <template>
-  <div class="rainbow-piechart">
-    <section class="links">
-      <ul>
-        <li
-          v-for="(item, i) in list"
-          :key="i"
-          :class="{ active: i === active }"
-        >
-          <a
-            href="#"
-            @mouseover="rotate(i);"
-          >{{ item.key }}</a>
-        </li>
-      </ul>
-    </section>
-
-    <section class="details">
-      <ul>
-        <li
-          v-for="(item, i) in list"
-          :key="i"
-          :class="{ active: i === active }"
-        >
-          {{ item.value }}
-        </li>
-      </ul>
-    </section>
-
-    <section class="circle-outer">
-      <div class="canvas">
-        <div class="initial-rotator">
-          <div
-            class="rotator"
-            :style="{ transform: 'rotate(' + rotation + 'deg)' }"
+  <div class="rbp">
+    <section class="rbp__canvas">
+      <div class="rbp__rotator-wrap">
+        <div class="rbp__rotator" :style="getTransform()">
+          <svg
+            version="1.1"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            x="0px"
+            y="0px"
+            viewBox="0 0 300 300"
+            id="rbp_part_bg"
           >
-            <svg
-              version="1.1"
-              xmlns="http://www.w3.org/2000/svg"
-              xmlns:xlink="http://www.w3.org/1999/xlink"
-              x="0px"
-              y="0px"
-              viewBox="0 0 300 300"
-              v-for="(item, i) in list"
-              :key="i"
-              :id="'part_' + i"
-              :class="{ active: i === active }"
-              :style="{ transform: 'rotate(' + i * degree + 'deg)' }"
-            >
-              <path
-                :d="theD"
-                :style="{ stroke: getStroke(i, degree) }"
-              />
-            </svg>
-          </div>
+            <ellipse fill="none" cx="150" cy="150" rx="122" ry="122" />
+          </svg>
+          <svg
+            version="1.1"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            x="0px"
+            y="0px"
+            viewBox="0 0 300 300"
+            v-for="(item, i) in list"
+            :key="i"
+            :id="`rbp_part_${i}`"
+            :class="{ 'rbp--active': i === active }"
+            :style="getRotation(i, degree)"
+          >
+            <path :d="theD" :style="{ stroke: getColor(i, degree) }" />
+          </svg>
         </div>
       </div>
+    </section>
+
+    <section class="rbp__legend">
+      <ul>
+        <li v-for="(item, i) in list" :key="i" :class="{ 'rbp--active' : i === active }">
+          <a
+            href="#"
+            @click.prevent="handleHover(i)"
+            @mouseover="handleHover(i)"
+            @mouseout="handleHoverOut()"
+          >
+            <span :style="{backgroundColor: getColor(i, degree)}"></span>
+            {{ item.key }}
+          </a>
+        </li>
+      </ul>
+    </section>
+
+    <section class="rbp__details">
+      <ul>
+        <li
+          v-for="(item, i) in list"
+          :key="i"
+          :class="{ 'rbp--active': i === active }"
+          v-html="item.value"
+        ></li>
+      </ul>
     </section>
   </div>
 </template>
 
 <script>
 export default {
-  name: "PieChart",
+  name: "RainbowPieChart",
   props: {
-    list: Array
+    list: {
+      type: Array,
+      required: true
+    },
+    rotate: {
+      type: Boolean,
+      default: true
+    },
+    autoplay: {
+      type: Boolean,
+      default: true
+    }
   },
 
   data() {
     return {
       rotation: 0,
-      active: 0
+      active: 0,
+      timer: null
     };
   },
 
@@ -83,6 +98,10 @@ export default {
     theD() {
       return this.describeArc(150, 150, 100, 0, this.degree);
     }
+  },
+
+  mounted() {
+    this.cycle();
   },
 
   methods: {
@@ -118,92 +137,170 @@ export default {
       return d;
     },
 
-    getStroke(index, degree) {
-      //return 'hsl(123,70%, 50%)';
-      return "hsla(" + index * degree + ", 70%, 50%, 0.6)";
+    getColor(i, degree) {
+      if (this.list[i].color) {
+        return this.list[i].color;
+      }
+      return "hsl(" + degree * i + ", 70%, 50%)";
     },
 
-    rotate(to) {
-      this.rotation = 72 * to;
-      this.active = to;
+    getRotation(i, degree) {
+      return { transform: "rotate(-" + degree * i + "deg)" };
+    },
+
+    getTransform() {
+      return { transform: "rotate(" + this.rotation + "deg)" };
+    },
+
+    handleHoverOut() {
+      this.cycle();
+    },
+
+    handleHover(index) {
+      if (this.rotate) {
+        this.rotation = (360 / this.parts) * index;
+      }
+      this.active = index;
+      clearInterval(this.timer);
+    },
+
+    cycle() {
+      if (typeof window === "undefined" || !this.autoplay) {
+        return;
+      }
+
+      this.timer = setInterval(() => {
+        this.active = this.active + 1 < this.parts ? this.active + 1 : 0;
+
+        /* minor rotate 
+        if (!this.rotate) {
+          this.rotation = this.rotation + 10 < 360 ? this.rotation + 10 : 0;
+        }
+        */
+        if (this.rotate) {
+          this.rotation = (360 / this.parts) * this.active;
+        }
+      }, 2000);
     }
   }
 };
 </script>
 
-<style scoped>
-li {
-  text-align: left;
-}
-a {
-  color: #42b983;
-}
+<style lang="scss">
+.rbp {
+  $opacity-default: 0.5;
+  $opacity-active: 0.75;
+  $transition-active: all 400ms ease-in-out;
 
-body {
-  margin: 50px;
-}
-
-#app {
-  width: 600px;
-  height: 300px;
-}
-
-.links {
-  float: left;
-  width: 300px;
-  height: 100px;
-
-  a {
-    display: block;
-    margin: 15px;
+  &__canvas {
+    float: left;
+    width: 60vw;
+    height: 60vw;
   }
-}
 
-.circle-outer {
-  //transform: rotate(20deg);
-}
+  &__legend {
+    float: left;
+    width: 40vw;
+    height: 60vw;
+    display: flex;
+    align-items: center;
 
-.canvas {
-  background: #f2f2f2;
-  height: 300px;
-  width: 300px;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid;
-}
+    li {
+      list-style: none;
+      text-align: left;
+      padding: 0.5em;
+      transition: $transition-active;
+      opacity: $opacity-default;
+    }
 
-.rotator {
-  height: 300px;
-  width: 300px;
-  position: relative;
-  overflow: hidden;
-  transition: all 1s ease-in-out;
-}
+    a {
+      color: black;
+      text-decoration: none;
+      font-size: 1.5em;
+    }
 
-.initial-rotator {
-  transform: rotate(2520deg);
-  transition: transform 2s ease-in-out;
-}
+    span {
+      display: inline-block;
+      height: 1em;
+      width: 1em;
+      font-size: 0.75em;
+      line-height: 1em;
+      margin: 0 1.5em 0.15em 0;
+      border-radius: 100%;
+      transition: $transition-active;
+      transform-origin: center;
+    }
 
-@keyframes spin {
-  100% {
-    transform: rotate(360deg);
+    .rbp--active {
+      opacity: $opacity-active;
+      span {
+        transform: scale(1.5);
+      }
+    }
   }
-}
 
-svg {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 300px;
-}
+  &__details {
+    position: relative;
+    float: left;
+    width: 100%;
 
-path {
-  fill: none;
-  stroke: #ddd;
-  stroke-width: 30;
-  stroke-linecap: round;
-  stroke-miterlimit: 10;
-  stroke-location: inside;
+    li {
+      position: absolute;
+      opacity: 0;
+      transition: $transition-active;
+
+      &.rbp--active {
+        opacity: 1;
+      }
+    }
+  }
+
+  &__canvas {
+    position: relative;
+    overflow: hidden;
+    width: 50%;
+  }
+
+  &__rotator-wrap {
+    transform: rotate(54deg);
+    height: 100%;
+  }
+
+  &__rotator {
+    height: 100%;
+    width: 100%;
+    min-height: 300px;
+    position: relative;
+    overflow: hidden;
+    transition: all 1s ease-in-out;
+  }
+
+  @keyframes spin {
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  svg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  path {
+    fill: none;
+    stroke: #ddd;
+    stroke-width: 40;
+    stroke-linecap: round;
+    stroke-miterlimit: 10;
+    opacity: $opacity-default;
+    transition: $transition-active;
+  }
+
+  &__active path {
+    opacity: 0.75;
+  }
 }
 </style>
